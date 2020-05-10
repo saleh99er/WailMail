@@ -1,2 +1,4 @@
 user.txt
 SampleEmail.txt
+__pycache__/
+emailClientReader.pyc
