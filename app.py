@@ -6,21 +6,22 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-        return render_template('index.html')
+    return render_template('index.html', update_msg="waiting for user input and update button press")
 
 
-def add_rule():
-    print("adding rule")
+#def add_rule():
+#    print("adding rule")
 
-#background process happening without any refreshing
-@app.route('/background_process_test')
-def background_process_test():
-    print ("Test button pressed", file=sys.stderr)
-    return ("nothing")
 
-@app.route('/update_rules/', methods=["POST"])
+@app.route('/update', methods=["POST"])
 def update_rules():
-    pass       
+    update_msg = "Updating..."
+    contain_str = request.form['str_field']
+
+    #user_input = 'You entered: {}'.format(request.form)
+    print(contain_str, file=sys.stderr)
+    print(update_msg, file=sys.stderr)
+    return 'contains: ' + contain_str
 
 @app.route('/add-audio')
 def add_audio():

@@ -3,36 +3,22 @@
 		<link rel="stylesheet" href='/static/style.css'/>
 	</head>
 	<body>
-		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-		<script type=text/javascript>
-        		$(function() {
-		         $('a#test').bind('click', function() {
-			  $.getJSON('/background_process_test',
-				function(data) {
-                                //do nothing
-		    		});
-			  return false;
-			  });
-		         });
-		       $(function() {
-                        $('a#update').bind('click',function() {
-			 $.getJSON('/update_rules',
-				function(data) {
-				//do nothing
-				});
-			   return false;
-			 });
-                        });
-		</script>
 
 		<h1>Wail Mail</h1>
 		<div id="ui">
-			<a href=# id=test><button class='btn btn-default'>Test</button></a>
-			<a href=# id=update><button id="add_rule" on_click=add_rule()>Add Rule</button></a>
-			<button id="update" on_click=update()> Update </button>
-			<ul id="rules">
-				<li id="rule1">Contains <textarea name="str_field"></textarea>  ==&gt mp3 file name: <textarea id=mp3_file></textarea></li>
-			</ul>
+			<button id="add_rule">Add Rule</button>
+			<form action="{{ url_for('update_rules') }}" method="post">
+				<ul id="rules">
+					<li id="update_el"> <button name="updateBtn" id="update" type="submit"> Update </button>  </li>
+					<li id="rule1">
+						Contains <textarea name="str_field"></textarea>  ==&gt mp3 file name: <textarea id=mp3_file></textarea>
+					</li>
+				</ul>
+			</form>
+		</div>
+
+		<div>
+			<p>{{update_msg}} </p>
 		</div>
 	</body>
 </html>
