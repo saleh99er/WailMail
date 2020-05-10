@@ -1,6 +1,8 @@
 from flask import Flask, render_template,Response, request, redirect, url_for
-import emailClientReader
+import subprocess
 import sys
+
+proc = subprocess.Popen(["python3", "-c", "import emailClientReader; emailClientReader.startECR()"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
 app = Flask(__name__)
 

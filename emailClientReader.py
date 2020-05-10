@@ -20,7 +20,6 @@ PASSWORD =  passwordFile.read() #have it read an encrypted file w/ password
 MAILBOX = 'Inbox'
 NEWMAIL_OFFSET = 0 
 MAIL_CHECK_FREQ = 20
-old_email_count = 0
 
 # returns KV pair of datetime of email received date and email object 
 def email_to_KV(email_obj):
@@ -48,6 +47,7 @@ def startECR():
         select_info = server.select_folder(MAILBOX)
 
     try:
+        old_email_count = 0
         while(connected):
             last_check = None
             folder_status = server.folder_status(MAILBOX, 'UNSEEN')
