@@ -23,9 +23,9 @@ import queue
 class LoginInfo:
     def __init__(self, filename="user.txt"):
         emailAcctFile = open(filename, "r")
-        self.HOSTNAME = emailAcctFile.read().rstrip()
-        self.USERNAME = emailAcctFile.read().rstrip()
-        self.PASSWORD = emailAcctFile.read().rstrip()
+        self.HOSTNAME = emailAcctFile.readline().strip()
+        self.USERNAME = emailAcctFile.readline().strip()
+        self.PASSWORD = emailAcctFile.readline().strip()
         print(self.HOSTNAME + self.USERNAME)
         # Please use an app password
 
@@ -36,8 +36,6 @@ MAIL_CHECK_FREQ = 20
 
 # returns KV pair of datetime of email received date and email object 
 def email_to_KV(email_obj):
-    #print("emailToKV("+str(email_obj)+")")
-    #print(type(email_obj))
     email_mktime = time.mktime(email.utils.parsedate(email_obj['Date']))
     return (email_mktime, email_obj)
 
