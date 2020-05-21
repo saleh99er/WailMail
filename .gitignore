@@ -2,3 +2,4 @@ user.txt
 SampleEmail.txt
 static/audio/*
 __pycache__
+emailClientReader.pyc
