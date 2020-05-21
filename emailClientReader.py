@@ -13,10 +13,23 @@ import sys
 import email
 import datetime
 
-HOSTNAME = 'imap.gmail.com'
-USERNAME = 'sih28@cornell.edu'
-passwordFile = open("user.txt","r")
-PASSWORD =  passwordFile.read() #have it read an encrypted file w/ password
+import concurrent.futures
+import logging
+import threading
+import time
+import random 
+import queue
+
+class LoginInfo:
+    def __init__(self, filename="user.txt"):
+        emailAcctFile = open(filename, "r")
+        self.HOSTNAME = emailAcctFile.read().rstrip()
+        self.USERNAME = emailAcctFile.read().rstrip()
+        self.PASSWORD = emailAcctFile.read().rstrip()
+        print(self.HOSTNAME + self.USERNAME)
+        # Please use an app password
+
+
 MAILBOX = 'Inbox'
 NEWMAIL_OFFSET = 0 
 MAIL_CHECK_FREQ = 20
@@ -32,18 +45,28 @@ def email_to_KV(email_obj):
 def extractDate(kv):
     return kv[0]
 
+""" extract emails from IMAP server connection within messages and marks them as unread """
+def extractEmailsFromIMAP(messages, email_list, server):
+    email_ids = []
+    for uid, message_data in server.fetch(messages, 'RFC822').items():
+        email_message = email.message_from_bytes(message_data[b'RFC822'])
+        email_ids.append(uid)
+        email_list.append(email_to_KV(email_message))
+    server.remove_flags(email_ids, [SEEN])
+
 def startECR():
-    ReadEmailIds = []
+
+    acct = LoginInfo()
 
     try:
-        server = IMAPClient(HOSTNAME, use_uid=True, ssl=True)
-        server.login(USERNAME, PASSWORD)
+        print(acct.HOSTNAME + " " + acct.USERNAME + " " + acct.PASSWORD)
+        server = IMAPClient(acct.HOSTNAME, use_uid=True, ssl=True)
+        server.login(acct.USERNAME, acct.PASSWORD)
     except:
         connected = False
         print("ECR:: Error occurred while connecting")
     else:
         connected = True
-        #print("Successful connection")
         select_info = server.select_folder(MAILBOX)
 
     try:
@@ -62,19 +85,13 @@ def startECR():
                 delta = newmails - old_email_count
                 messages = server.search('UNSEEN')
                 last_check = datetime.datetime.now()
-                #print("reading " + str(delta) + " emails")
                 email_list = []
 
-                # Extracting emails from IMAP Server
-                for uid, message_data in server.fetch(messages, 'RFC822').items():
-                    email_message = email.message_from_bytes(message_data[b'RFC822'])
-                    #print("DEBUG, email msg contents " + str(email_message))
-                    #print(uid, email_message.get('From'), email_message.get('Subject'))
-                    ReadEmailIds.append(uid)
-                    email_list.append(email_to_KV(email_message))
+                # Extracting unread emails from IMAP Server 
+                extractEmailsFromIMAP(messages, email_list, server)
 
                 # sort by date received,newest 1st
-                # email_list.sort(reverse=True, key=extractDate)
+                email_list.sort(reverse=True, key=extractDate)
 
                 # implicit filtering, only read delta emails
                 #print("--------begin implicit email list----------")
@@ -89,7 +106,7 @@ def startECR():
                         print(email_obj.get_payload())
                 #print("---------end implicit email list-----------")
                 # Marking extracted emails as unread
-                server.remove_flags(ReadEmailIds, [SEEN])
+                
                 time.sleep(MAIL_CHECK_FREQ)
                 old_email_count = newmails
     except KeyboardInterrupt:
