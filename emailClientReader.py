@@ -26,6 +26,7 @@ class LoginInfo:
         self.HOSTNAME = emailAcctFile.readline().strip()
         self.USERNAME = emailAcctFile.readline().strip()
         self.PASSWORD = emailAcctFile.readline().strip()
+        emailAcctFile.close()
         # Please use an app password
 
 
@@ -57,6 +58,17 @@ class ECR:
             email_list.append(ECR.email_to_KV(email_message))
         server.remove_flags(email_ids, [SEEN])
 
+    """ blocking put() for queue unless end_event occurs """
+    def put_email_in_queue(self,email_tuple):
+        while(not self.end_event.is_set()):
+            try:
+                self.queue.put(email_tuple, block=False)
+                break
+            except queue.FULL as e:
+                pass #try again
+                
+
+
     def startECR(self):
         # Read user's email account info in user.txt
         acct = LoginInfo() 
@@ -78,13 +90,11 @@ class ECR:
             old_email_count = 0
             self.logging.info("endEvent, isSet =" + str(self.end_event.is_set()))
             while(connected and not self.end_event.is_set()):
-                self.logging.info("ECR connected")
                 folder_status = server.folder_status(ECR.MAILBOX, 'UNSEEN')
-                #print("folder status info" + str(folder_status))
                 newmails = int(folder_status[b'UNSEEN'])
                 if(old_email_count > newmails):#client has deleted some of their old mail, reset count
                     old_email_count = 0
-                elif(old_email_count == newmails):#no new email to output
+                elif(old_email_count == newmails):#no new emails to output
                     pass
                     #print("no new emails to output")
                 else:
@@ -112,15 +122,19 @@ class ECR:
                         else:
                             email_body = email_obj.get_payload()
                         email_tuple = (email_subj, email_from, email_multipart, email_body)
-                        self.queue.put(email_tuple)
-                        self.logging.info("ECR placed email content " + email_subj)
-
-                    #print("---------end implicit email list-----------")
+                        
+                        self.put_email_in_queue(email_tuple)
+                        # self.logging.info("ECR placed email content " + email_subj)
                     # Marking extracted emails as unread
-                    
-                    time.sleep(self.check_freq)
                     old_email_count = newmails
+                time.sleep(self.check_freq)
+            
+            end_of_loop_str = "ECR:: end of email polling loop, connection=" + str(connected) + " endEvent=" + str(end_event.is_set())
+            self.logging.info(end_of_loop_str)
         except KeyboardInterrupt:
             self.logging("ECR::closing email client")
             self.end_event.set()
             server.logout()
+            return
+        except Exception as e:
+            self.logging(e)

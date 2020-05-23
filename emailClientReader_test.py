@@ -12,14 +12,14 @@ def consumer(queue, logging, endEvent):
             queue_el = queue.get()
             logging.info(queue_el[0])
     except KeyboardInterrupt:
-        queue.get()
         logging.info("Consumer:: Keyboard interrupt, exiting")
+        queue.get()
         endEvent.set()
 
 endEvent = threading.Event()
 emailQueue = queue.Queue()
 ctrlQueue = queue.Queue()
-ecr = emailClientReader.ECR(emailQueue, endEvent, logging)
+ecr = emailClientReader.ECR(emailQueue, endEvent, logging, check_freq=5)
 print(endEvent.is_set())
 
 format = "%(asctime)s: %(message)s"
@@ -34,12 +34,19 @@ logging.getLogger().setLevel(logging.INFO)
 with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
         producer_future = executor.submit(ecr.startECR)
         logging.info("started producer")
-        consumer_future = executor.submit(consumer, (emailQueue, logging, endEvent))
+        consumer_future = executor.submit(consumer, emailQueue, logging, endEvent)
         logging.info("started consumer")
-        while(True):
-            time.sleep(1)
-            logging.info("q size " + str(emailQueue.qsize()))
-            logging.info(producer_future)
-            #producer_future.result()
-            logging.info(consumer_future)
-            #consumer_future.result()
+        try:
+            while(True):
+                time.sleep(1)
+                logging.info("q size " + str(emailQueue.qsize()))
+                logging.info(producer_future)
+                producer_future.result()
+                logging.info(consumer_future)
+                #consumer_future.result()
+
+        except Exception as e:
+            logging.info("ECR_test: exception occurred")
+            logging.info(e)
+            
+
