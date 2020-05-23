@@ -47,28 +47,28 @@ logging.getLogger().setLevel(logging.INFO)
 
 with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
         producer_future = executor.submit(ecr.startECR)
-        logging.info("started producer")
+        logging.info("ECR_test::started producer")
         consumer_future = executor.submit(consumer, emailQueue, logging, endEvent)
-        logging.info("started consumer")
+        logging.info("ECR_test::started consumer")
 
         i = 0
         try:
             while(i < 10):
                 time.sleep(1)
-                logging.info("q size " + str(emailQueue.qsize()))
+                logging.info("ECR_test:: q size " + str(emailQueue.qsize()))
                 logging.info(producer_future)
                 #producer_future.result()
                 logging.info(consumer_future)
                 i += 1
                 #consumer_future.result()
             endEvent.set()
-            logging.info("set end event")
+            logging.info("ECR_test:: set end event")
             time.sleep(10)
             logging.info(producer_future)
             logging.info(consumer_future)
 
         except Exception as e:
-            logging.info("ECR_test: exception occurred")
+            logging.info("ECR_test:: exception occurred")
             logging.info(e)
             
 
