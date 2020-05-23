@@ -33,8 +33,10 @@ class LoginInfo:
 class ECR:
     MAILBOX = 'Inbox'
 
-    def __init__(self, email_queue, check_freq = 20):
+    def __init__(self, email_queue, end_event, logging, check_freq = 20):
         self.queue = email_queue
+        self.end_event = end_event
+        self.logging = logging
         self.check_freq = check_freq
 
     """returns KV pair of datetime of email received date and email object"""
@@ -65,16 +67,18 @@ class ECR:
             server.login(acct.USERNAME, acct.PASSWORD)
         except:
             connected = False
-            print("ECR:: Error occurred while connecting")
+            self.logging.info("ECR:: Error occurred while connecting")
             return
-
+        
         connected = True
         select_info = server.select_folder(ECR.MAILBOX)
+        self.logging.info("ECR connected")
 
         try:
             old_email_count = 0
-            while(connected):
-                last_check = None
+            self.logging.info("endEvent, isSet =" + str(self.end_event.is_set()))
+            while(connected and not self.end_event.is_set()):
+                self.logging.info("ECR connected")
                 folder_status = server.folder_status(ECR.MAILBOX, 'UNSEEN')
                 #print("folder status info" + str(folder_status))
                 newmails = int(folder_status[b'UNSEEN'])
@@ -96,11 +100,11 @@ class ECR:
                     email_list.sort(reverse=True, key=ECR.extractDate)
 
                     # implicit filtering, only read delta emails
-                    #print("--------begin implicit email list----------")
                     for i in range(delta):
                         email_obj = email_list[i][1]
                         email_subj = email_obj.get('Subject')
                         email_from = email_obj.get('From')
+                        email_body = None
                         email_multipart = []
                         if(email_obj.is_multipart()):
                             for payload in email_obj.get_payload():
@@ -108,7 +112,8 @@ class ECR:
                         else:
                             email_body = email_obj.get_payload()
                         email_tuple = (email_subj, email_from, email_multipart, email_body)
-                        self.email_queue.put(email_tuple)
+                        self.queue.put(email_tuple)
+                        self.logging.info("ECR placed email content " + email_subj)
 
                     #print("---------end implicit email list-----------")
                     # Marking extracted emails as unread
@@ -116,5 +121,6 @@ class ECR:
                     time.sleep(self.check_freq)
                     old_email_count = newmails
         except KeyboardInterrupt:
-            print("ECR::closing email client")
+            self.logging("ECR::closing email client")
+            self.end_event.set()
             server.logout()
