@@ -5,12 +5,26 @@ import logging
 import threading
 import time
 
+def get_email_in_queue(email_queue, endEvent):
+    while(not endEvent.is_set()):
+        try:
+            queue_el = email_queue.get(block=False)
+            logging.info("got email from queue")
+            return queue_el
+        except queue.Empty:
+            pass
+    return None
+
 def consumer(queue, logging, endEvent):
     try:
         logging.info("starting consumer")
         while(not endEvent.is_set()):
-            queue_el = queue.get()
+            queue_el = get_email_in_queue(queue, endEvent)
+            if(queue_el is None):
+                logging.info("Consumer:: End event set")
+                return
             logging.info(queue_el[0])
+        logging.info("Consumer:: End event set")
     except KeyboardInterrupt:
         logging.info("Consumer:: Keyboard interrupt, exiting")
         queue.get()
@@ -36,14 +50,22 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
         logging.info("started producer")
         consumer_future = executor.submit(consumer, emailQueue, logging, endEvent)
         logging.info("started consumer")
+
+        i = 0
         try:
-            while(True):
+            while(i < 10):
                 time.sleep(1)
                 logging.info("q size " + str(emailQueue.qsize()))
                 logging.info(producer_future)
-                producer_future.result()
+                #producer_future.result()
                 logging.info(consumer_future)
+                i += 1
                 #consumer_future.result()
+            endEvent.set()
+            logging.info("set end event")
+            time.sleep(10)
+            logging.info(producer_future)
+            logging.info(consumer_future)
 
         except Exception as e:
             logging.info("ECR_test: exception occurred")

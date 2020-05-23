@@ -129,7 +129,7 @@ class ECR:
                     old_email_count = newmails
                 time.sleep(self.check_freq)
             
-            end_of_loop_str = "ECR:: end of email polling loop, connection=" + str(connected) + " endEvent=" + str(end_event.is_set())
+            end_of_loop_str = "ECR:: end of email polling loop, connection=" + str(connected) + " endEvent=" + str(self.end_event.is_set())
             self.logging.info(end_of_loop_str)
         except KeyboardInterrupt:
             self.logging("ECR::closing email client")
