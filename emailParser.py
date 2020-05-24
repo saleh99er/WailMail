@@ -8,7 +8,14 @@ class Rule:
         self.condition = condition
         self.audio = audio
 
-    def checkCondition(self)
+    def check_condition(self):
+        return self.condition.eval()
+    
+    def terms_of_interest(self):
+        return list(self.condition.terms.keys())
+    
+    def set_true_term(self, word):
+        self.condition.setTrue(word)
     
     
 class Condition:

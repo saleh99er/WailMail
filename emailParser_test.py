@@ -44,5 +44,20 @@ def condition_tests():
     print("Condition class tests passed")
 
 def rule_tests():
+    condition_grades = Condition("(cms or gradescope) or piazza or cornell.edu")
+    rule_yeet = Rule(1, condition_grades, "yeet.mp3")
+    
+    result = rule_yeet.check_condition()
+    assert(result == False)
+
+    rule_yeet.set_true_term("cornell.edu")
+    result = rule_yeet.check_condition()
+    assert(result == True)
+
+    terms = rule_yeet.terms_of_interest()
+    assert(terms == ["cms", "gradescope", "piazza", "cornell.edu"])
+    
+    print("Rule class tests passed")
 
 condition_tests()
+rule_tests()
