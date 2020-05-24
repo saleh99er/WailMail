@@ -36,7 +36,7 @@ class Condition:
         self.terms = {} # string key, boolean val dictionary
         self.str_list = cond_str.split()
         Condition.adjust_paren(self.str_list)
-        self.cond_str = " ".join(str_list)
+        self.cond_str = " ".join(self.str_list)
         for word in self.str_list:
             if(Condition.neq(word, Condition.do_not_replace)):
                 self.terms[word] = False
@@ -46,9 +46,10 @@ class Condition:
             self.terms[word] = True
 
     def eval(self):
-        temp = self.cond_str.split("*")
-         
+        eval_str = self.cond_str
         for key in self.terms.keys():
-            eval_str = eval_str.replace(key,str(self.terms[key]))
+            eval_str = re.sub(r"\b%s\b" % key, str(self.terms[key]), eval_str)
+            #eval_str = eval_str.replace(key,str(self.terms[key]))
+        print(eval_str)
         return eval(eval_str)
 
