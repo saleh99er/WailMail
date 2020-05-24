@@ -2,12 +2,17 @@ import time
 import re
 
 class Rule:
+    """ """
     def __init__(self, id, condition, audio):
         self.id = id
         self.condition = condition
         self.audio = audio
+
+    def checkCondition(self)
+    
     
 class Condition:
+    """ """
     do_not_replace = ['not', 'and', 'or', '(', ')']
 
     def neq(s, check_these):

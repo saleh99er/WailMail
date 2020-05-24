@@ -37,6 +37,12 @@ def condition_tests():
     result = condition_campus.eval()
     assert(result == True)
 
+    condition_campus.setTrue("north")
+    result = condition_campus.eval()
+    assert(result == False)
+
     print("Condition class tests passed")
+
+def rule_tests():
 
 condition_tests()
