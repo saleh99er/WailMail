@@ -1,5 +1,6 @@
 import time
 import re
+from WailMail_common import *
 
 class Rule:
     """ """
@@ -15,11 +16,18 @@ class Rule:
         return list(self.condition.terms.keys())
     
     def set_true_term(self, word):
-        self.condition.setTrue(word)
+        self.condition.set_true(word)
+
+    def reset_state(self):
+        self.condition.reset_state()
     
     
 class Condition:
-    """ """
+    """ 
+    class to represent email conditional expressions, 
+    a word represents a term and is true if it occurs at
+    least once in from, subject, or email body
+    """
     do_not_replace = ['not', 'and', 'or', '(', ')']
 
     def neq(s, check_these):
@@ -53,15 +61,73 @@ class Condition:
             if(Condition.neq(word, Condition.do_not_replace)):
                 self.terms[word] = False
 
-    def setTrue(self, word):
+    def set_true(self, word):
         if(word in self.terms):
             self.terms[word] = True
+
+    def reset_state(self):
+        for word in self.terms:
+            self.terms[word] = False
 
     def eval(self):
         eval_str = self.cond_str
         for key in self.terms.keys():
             eval_str = re.sub(r"\b%s\b" % key, str(self.terms[key]), eval_str)
-            #eval_str = eval_str.replace(key,str(self.terms[key]))
-        print(eval_str)
+        #print(eval_str)
         return eval(eval_str)
+
+class EmailParser:
+
+    def __init__(self, email_queue, rule_queue, audio_queue, end_event, logging, check_freq=5):
+        self.email_queue = email_queue
+        self.rule_queue = rule_queue
+        self.audio_queue = audio_queue
+        self.end_event = end_event
+        self.rules = {}
+        self.logging = logging
+        self.check_freq = check_freq
+
+    def check_email_for_rule(rule, email_tuple):
+        rule.reset_state()
+        terms_to_check = rule.terms_of_interest()
+
+        for i in range(0, 2):
+            if(email_tuple[i] != None and type(email_tuple) == str):
+                for term in terms_to_check:
+                    #re.search(r'\b' + words + r'\b', s):
+                    if(re.search(r'\b' + term + r'\b', email_tuple[i])):
+                        rule.set_true(term)
+        for part in multipart:
+            if(part != None and type(part) == str):
+                if(re.search(r'\b' + term + r'\b', email_tuple[i])):
+                        rule.set_true(term)
+        return rule.check_condition()
+
+    
+    def startParser(self):
+        self.logging.info("EP:: starting emailParser")
+
+        while(not self.end_event.is_set()):
+
+            # add new rules as they're received from the rule_queue
+            if(not self.rule_queue.empty()):
+                rule = get_from_queue(rule_queue, end_event)
+                self.rules[rule.id] = rule
+
+            check_rules = list(self.rules.values())
+
+            # extract emails from email queue until empty, check all rules for each email from queue
+            while(not self.email_queue.empty()):
+                email_tuple = get_from_queue(email_queue, end_event)
+                for rule in check_rules:
+                    if(EmailParser.check_email_for_rule(rule, email_tuple)):
+                        self.logging.info("EP:: rule event occurred, scheduling " + rule.audio)
+                        put_in_queue(self.audio_queue, rule.audio, self.end_event)
+
+            time.sleep(self.check_freq)
+                
+
+
+            
+            
 
