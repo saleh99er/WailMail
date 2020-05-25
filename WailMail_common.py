@@ -1,6 +1,8 @@
 
 """" utility functions across all modules for Wail Mail"""
 
+import queue
+
 def get_from_queue(queue, end_event):
     while(not end_event.is_set()):
         try:

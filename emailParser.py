@@ -2,6 +2,10 @@ import time
 import re
 from WailMail_common import *
 
+import logging
+import threading
+import queue
+
 class Rule:
     """ """
     def __init__(self, id, condition, audio):
@@ -104,27 +108,31 @@ class EmailParser:
         return rule.check_condition()
 
     
-    def startParser(self):
-        self.logging.info("EP:: starting emailParser")
+    def parseQueues(self):
+        self.logging.info("EP:: start of parsing queues")
 
-        while(not self.end_event.is_set()):
+        # add new rules as they're received from the rule_queue
+        if(not self.rule_queue.empty()):
+            rule = get_from_queue(self.rule_queue, self.end_event)
+            self.rules[rule.id] = rule
+            self.logging.info("EP:: added rule " + str(rule.id))
 
-            # add new rules as they're received from the rule_queue
-            if(not self.rule_queue.empty()):
-                rule = get_from_queue(rule_queue, end_event)
-                self.rules[rule.id] = rule
+        check_rules = list(self.rules.values())
+        
 
-            check_rules = list(self.rules.values())
+        # extract emails from email queue until empty, check all rules for each email from queue
+        self.logging.info("EP:: uhoh big stinky " + str(self.email_queue.empty()))
+        while(not self.email_queue.empty()):
+            email_tuple = get_from_queue(self.email_queue, self.end_event)
+            self.logging.info("EP:: uhoh big stinky ")
+            self.logging.info("EP:: got email " + str(email_tuple[0]))
+            self.logging.info("EP:: uhoh big stinky ")
+            for rule in check_rules:
+                if(EmailParser.check_email_for_rule(rule, email_tuple)):
+                    self.logging.info("EP:: rule event occurred, scheduling " + rule.audio)
+                    put_in_queue(self.audio_queue, rule.audio, self.end_event)
+        self.logging.info("EP:: ending parseQueues function call")
 
-            # extract emails from email queue until empty, check all rules for each email from queue
-            while(not self.email_queue.empty()):
-                email_tuple = get_from_queue(email_queue, end_event)
-                for rule in check_rules:
-                    if(EmailParser.check_email_for_rule(rule, email_tuple)):
-                        self.logging.info("EP:: rule event occurred, scheduling " + rule.audio)
-                        put_in_queue(self.audio_queue, rule.audio, self.end_event)
-
-            time.sleep(self.check_freq)
                 
 
 
