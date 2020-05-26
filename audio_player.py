@@ -17,7 +17,7 @@ def audio_player(audio_queue, end_event, logging, check_freq=1):
             if audio_filename is not None:
                 audio_playback = os.system("omxplayer -o local " + audio_filename)
                 logging.info("AC::" + audio_filename + " return code:" + str(audio_playback))
-            time.sleep(check_freq)
+            #time.sleep(check_freq)
         time.sleep(check_freq)
 
 def dummy_audio_producer(audio_queue, end_event, logging):
@@ -26,7 +26,7 @@ def dummy_audio_producer(audio_queue, end_event, logging):
         audio_filenames = ["john_cena.mp3", "megolovania_short.mp3", "screaming_sheep.mp3", "oh_no_no_no.mp3"]
         put_in_queue(audio_queue, audio_filenames[i % 4], end_event)
         logging.info("AP::" + audio_filenames[i % 4] + " produced")
-        time.sleep(10)
+        time.sleep(20) # audio player can't exit (without sigint) until audio file is done being played
         i += 1
 
 
