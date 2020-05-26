@@ -146,14 +146,7 @@ def email_parser_util_tests():
 
     print("all Email Parser util function tests pass")
 
-def confirm_thread_finished(f):
-    try:
-        if(f.running() == True):
-            return False
-        x = f.result()
-        return True
-    except:
-        return False
+
         
 
 def emailparser_tests(test_duration):

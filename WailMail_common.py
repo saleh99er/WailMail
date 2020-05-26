@@ -20,3 +20,12 @@ def put_in_queue(queue, element, end_event):
             break
         except:
             pass # try again
+
+def confirm_thread_finished(f):
+    try:
+        if(f.running() == True):
+            return False
+        x = f.result()
+        return True
+    except:
+        return False
