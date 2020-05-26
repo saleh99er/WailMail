@@ -17,6 +17,7 @@ def audio_player(audio_queue, end_event, logging, check_freq=1):
             if audio_filename is not None:
                 audio_playback = os.system("omxplayer -o local " + audio_filename)
                 logging.info("AC::" + audio_filename + " return code:" + str(audio_playback))
+            time.sleep(check_freq)
         time.sleep(check_freq)
 
 def dummy_audio_producer(audio_queue, end_event, logging):
