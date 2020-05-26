@@ -98,19 +98,25 @@ def dummy_producer_email(email_queue, end_event, logging):
         i += 1
     logging.info("dummy e producer:: exiting")
 
-
 def dummy_producer_rules(rule_queue, end_event, logging):
     rules = []
     logging.info("dummy r producer:: starting")
+
     condition_some_school = Condition("somebody@some_school.edu")
     rule_yeet = Rule(0, condition_some_school, "screaming_sheep.mp3")
     rules.append(rule_yeet)
+
+    condition_assignment = Condition("new and assignment")
+    rule_uhoh = Rule(1, condition_assignment, "siren.mp3")
+    rules.append(rule_uhoh)
+
+
     rule_count = 0
 
     logging.info("dummy r producer:: done setting up initial rules")
     while(not end_event.is_set() and rule_count < len(rules)):
         logging.info("dummy r producer:: iteration")
-        time.sleep(10)
+        time.sleep(5)
         put_in_queue(rule_queue, rules[rule_count], end_event)
         logging.info("dummy r producer:: rule #" +str(rule_count) +" inserted")
         rule_count += 1
@@ -121,9 +127,10 @@ def dummy_consumer_audio(audio_queue, end_event, logging):
     logging.info("dummy a consumer:: starting")
     while(not end_event.is_set()):
         time.sleep(1)
-        while(not audio_queue.empty()):
+        if(not audio_queue.empty()):
             audio_request = get_from_queue(audio_queue, end_event)
-            logging.info("dummy a consumer::" + audio_request)
+            if(audio_request is not None):
+                logging.info("dummy a consumer::" + audio_request)
     logging.info("dummy a consumer:: exiting")
 
 def email_parser_util_tests():
@@ -139,6 +146,15 @@ def email_parser_util_tests():
 
     print("all Email Parser util function tests pass")
 
+def confirm_thread_finished(f):
+    try:
+        if(f.running() == True):
+            return False
+        x = f.result()
+        return True
+    except:
+        return False
+        
 
 def emailparser_tests(test_duration):
 
@@ -177,8 +193,13 @@ def emailparser_tests(test_duration):
         end_event.set()
         time.sleep(10)
         logging.info("EPF::" + str(email_producer_future))
+        assert confirm_thread_finished(email_producer_future)
         logging.info("RPF::" + str(rule_producer_future))
+        assert confirm_thread_finished(rule_producer_future)
         logging.info("EPCF::" + str(ep_consumer_future))
+        assert confirm_thread_finished(ep_consumer_future)
+        logging.info("ACF::" + str(audio_consumer_future))
+        assert confirm_thread_finished(audio_consumer_future)
         print("Email Parser class tests passed")
 
     print(end_event.is_set())

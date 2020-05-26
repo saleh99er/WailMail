@@ -126,6 +126,9 @@ class EmailParser:
             # extract emails from email queue until empty, check all rules for each email from queue
             while(not self.email_queue.empty()):
                 email_tuple = get_from_queue(self.email_queue, self.end_event)
+                if(email_tuple is None):
+                    self.logging.info("EP:: end of parsing queues")
+                    return
                 self.logging.info("EP:: got email " + str(email_tuple[0]))
                 
                 for rule in check_rules:
