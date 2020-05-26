@@ -102,7 +102,7 @@ def dummy_producer_email(email_queue, end_event, logging):
 def dummy_producer_rules(rule_queue, end_event, logging):
     rules = []
     logging.info("dummy r producer:: starting")
-    condition_some_school = Condition("some_school.edu")
+    condition_some_school = Condition("somebody@some_school.edu")
     rule_yeet = Rule(0, condition_some_school, "screaming_sheep.mp3")
     rules.append(rule_yeet)
     rule_count = 0
@@ -120,10 +120,25 @@ def dummy_producer_rules(rule_queue, end_event, logging):
 def dummy_consumer_audio(audio_queue, end_event, logging):
     logging.info("dummy a consumer:: starting")
     while(not end_event.is_set()):
-        time.sleep(5)
-        audio_request = get_from_queue(audio_queue, end_event)
-        logging.info("dummy audio consumer::" + audio_request)
+        time.sleep(1)
+        while(not audio_queue.empty()):
+            audio_request = get_from_queue(audio_queue, end_event)
+            logging.info("dummy a consumer::" + audio_request)
     logging.info("dummy a consumer:: exiting")
+
+def email_parser_util_tests():
+    email_1_tuple = ("somebody@some_school.edu", "Email #1", "hello world", [])
+    condition_some_school = Condition("somebody@some_school.edu")
+    rule_yeet = Rule(0, condition_some_school, "screaming_sheep.mp3")
+    result = EmailParser.check_email_for_rule(rule_yeet, email_1_tuple)
+    assert result == True
+
+    condition_some_school = Condition("some_school.edu")
+    result = EmailParser.check_email_for_rule(rule_yeet, email_1_tuple)
+    assert result == True
+
+    print("all Email Parser util function tests pass")
+
 
 def emailparser_tests(test_duration):
 
@@ -143,7 +158,7 @@ def emailparser_tests(test_duration):
     ep = EmailParser(email_queue, rule_queue, audio_queue, end_event, logging)
     seconds = 0
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
         email_producer_future = executor.submit(dummy_producer_email, email_queue, end_event, logging)
         rule_producer_future = executor.submit(dummy_producer_rules, rule_queue, end_event, logging)
         ep_consumer_future = executor.submit(ep.parseQueues)
@@ -161,13 +176,10 @@ def emailparser_tests(test_duration):
         
         end_event.set()
         time.sleep(10)
-        logging.info("EPF::" + email_parser_future)
-        logging.info("RPF::" + rule_producer_future)
-        logging.info("EPCF::" + ep_consumer_future)
+        logging.info("EPF::" + str(email_producer_future))
+        logging.info("RPF::" + str(rule_producer_future))
+        logging.info("EPCF::" + str(ep_consumer_future))
         print("Email Parser class tests passed")
-
-
-
 
     print(end_event.is_set())
 
@@ -175,4 +187,5 @@ def emailparser_tests(test_duration):
 
 condition_tests()
 rule_tests()
-emailparser_tests(30)
+email_parser_util_tests()
+emailparser_tests(20)
