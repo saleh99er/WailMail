@@ -32,7 +32,7 @@ def flask_app(rule_queue, end_event):
             return render_template('index.html', rules_so_far = rules_so_far)
 
 
-    app.run()
+    app.run(host='0.0.0.0')
 
    
 

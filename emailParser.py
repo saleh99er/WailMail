@@ -155,7 +155,7 @@ class EmailParser:
                 
                 for rule in check_rules:
                     email_passes_rule = EmailParser.check_email_for_rule(rule, email_tuple)
-                    self.logging.info("cefr helper:" +str(email_passes_rule))
+                    # self.logging.info("cefr helper:" +str(email_passes_rule))
                     if(email_passes_rule):
                         self.logging.info("EP:: rule event occurred, scheduling " + rule.audio)
                         put_in_queue(self.audio_queue, rule.audio, self.end_event)
