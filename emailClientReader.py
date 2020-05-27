@@ -88,7 +88,7 @@ class ECR:
 
         try:
             old_email_count = 0
-            self.logging.info("endEvent, isSet =" + str(self.end_event.is_set()))
+            #self.logging.info("endEvent, isSet =" + str(self.end_event.is_set()))
             while(connected and not self.end_event.is_set()):
                 folder_status = server.folder_status(ECR.MAILBOX, 'UNSEEN')
                 newmails = int(folder_status[b'UNSEEN'])
@@ -121,7 +121,7 @@ class ECR:
                                 email_multipart.append(payload.get_payload())
                         else:
                             email_body = email_obj.get_payload()
-                        email_tuple = (email_subj, email_from, email_multipart, email_body)
+                        email_tuple = (email_subj, email_from, email_body, email_multipart)
                         
                         self.put_email_in_queue(email_tuple)
                         # self.logging.info("ECR placed email content " + email_subj)

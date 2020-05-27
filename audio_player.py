@@ -60,4 +60,4 @@ def audio_player_test(test_duration=30):
         confirm_thread_finished(audio_consumer_future)
         print("audio thread test finished")
 
-audio_player_test()
+#audio_player_test()

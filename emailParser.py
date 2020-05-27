@@ -13,6 +13,25 @@ class Rule:
         self.condition = condition
         self.audio = audio
 
+    def str_to_rule(s):
+        colonIndex = s.find(":")
+        if(colonIndex == -1):
+            return None
+        
+        id_no = s[:colonIndex]
+        s = s[(colonIndex+1):]
+
+        arrowIndex = s.find("->")
+        if(arrowIndex == -1):
+            return None
+        condition = s[:arrowIndex]
+        audio = s[arrowIndex+2:]
+
+        return Rule(int(id_no), Condition(condition.strip()), audio.strip())
+
+    def __str__(self):
+        return str(self.id) + ": " + self.condition.cond_str + " -> " + self.audio
+
     def check_condition(self):
         return self.condition.eval()
     
@@ -66,12 +85,14 @@ class Condition:
                 self.terms[word] = False
 
     def set_true(self, word):
+        logging.info("uhoh stinky")
         if(word in self.terms):
             self.terms[word] = True
 
     def reset_state(self):
         for word in self.terms:
             self.terms[word] = False
+
 
     def eval(self):
         eval_str = self.cond_str
@@ -118,9 +139,10 @@ class EmailParser:
             if(not self.rule_queue.empty()):
                 rule = get_from_queue(self.rule_queue, self.end_event)
                 self.rules[rule.id] = rule
-                self.logging.info("EP:: added rule " + str(rule.id))
+                self.logging.info("EP:: added rule " + str(rule))
 
             check_rules = list(self.rules.values())
+            self.logging.info( [str(rule) for rule in check_rules] )
             
 
             # extract emails from email queue until empty, check all rules for each email from queue
@@ -133,7 +155,7 @@ class EmailParser:
                 
                 for rule in check_rules:
                     email_passes_rule = EmailParser.check_email_for_rule(rule, email_tuple)
-                    # self.logging.info("cefr helper:" +str(email_passes_rule))
+                    self.logging.info("cefr helper:" +str(email_passes_rule))
                     if(email_passes_rule):
                         self.logging.info("EP:: rule event occurred, scheduling " + rule.audio)
                         put_in_queue(self.audio_queue, rule.audio, self.end_event)
