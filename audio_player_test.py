@@ -10,7 +10,6 @@ def dummy_audio_producer(audio_queue, end_event, logging):
 
 def audio_player_test(test_duration=30):
 
-    test play_based_on_os
     prev_dir = os.getcwd()
     os.chdir('static')
     os.chdir('audio')
