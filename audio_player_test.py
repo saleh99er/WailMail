@@ -4,6 +4,13 @@ import queue
 
 from audio_player import *
 
+def check_test():
+    f = open('/proc/cpuinfo')
+    for line in f:
+           print(line)
+    f.close()
+
+
 def dummy_audio_producer(audio_queue, end_event, logging):
     i = 0
     while(not end_event.is_set()):
@@ -54,4 +61,5 @@ def audio_player_test(test_duration=30):
         confirm_thread_finished(audio_consumer_future)
         print("audio thread test finished")
 
-audio_player_test()
+#audio_player_test()
+check_test()
