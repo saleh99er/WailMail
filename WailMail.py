@@ -54,7 +54,7 @@ if __name__ == '__main__':
     rule_queue = queue.Queue()
     audio_queue = queue.Queue()
 
-    ecr = ECR(email_queue, end_event, logging)
+    ecr = ECR(email_queue, end_event, logging, 10)
     ep = EmailParser(email_queue, rule_queue, audio_queue, end_event, logging)
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
@@ -68,7 +68,7 @@ if __name__ == '__main__':
 
         logging.info("Main::all threads started")
 
-        while(seconds < 30):
+        while(True):
             for number, future in enumerate(futures):
                 logging.info(str(number) + ":" + str(future))
             time.sleep(1)

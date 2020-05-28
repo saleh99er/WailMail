@@ -36,15 +36,19 @@ def determine_os():
                     if("Raspberry Pi" in line):
                         os_determined = DeterminedOS.RASPBIAN
                         return
-                os_determined = DeterminedOS.UBUNTU
-            os.chdir(prev_dir)
         except:
             os_determined = DeterminedOS.UNSUPPORTED
+        finally:
+            os.chdir(prev_dir)
+
+        print("ubuntu check")
+        index_uname = str(os.uname()).find("Ubuntu")
+        if(index_uname > -1):
+            print("decided ubuntu")
+            os_determined = DeterminedOS.UBUNTU
     else:
         os_determined = DeterminedOS.UNSUPPORTED
 
-         # to do, determine if raspberry pi or ubuntu
-    os_determined = DeterminedOS.UNSUPPORTED
 
 def play_based_on_os(audio_filename):
     if(os_determined == DeterminedOS.UNKNOWN):
