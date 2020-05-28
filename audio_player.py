@@ -26,11 +26,13 @@ def determine_os():
         os_determined = DeterminedOS.WINDOWS
         return
     elif(os.name == 'posix'):
+        print("so far determined linux-based")
         try:
             os.chdir('/')
             os.chdir('proc')
+            print("temp changed dir")
             with open('cpuinfo') as f:
-                if("Raspberry Pi" in f):
+                if("Raspberry" in f):
                     os_determined = DeterminedOS.RASPBIAN
                 else:
                     os_determined = DeterminedOS.UBUNTU
@@ -127,4 +129,4 @@ def audio_player_test(test_duration=30):
         confirm_thread_finished(audio_consumer_future)
         print("audio thread test finished")
 
-audio_player_test()
+#audio_player_test()
