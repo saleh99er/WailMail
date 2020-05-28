@@ -1,21 +1,77 @@
 import os
-
+from mutagen.mp3 import MP3
+import math
 import concurrent.futures
 import queue
 import logging
 import threading
 import time
+from enum import Enum
 
 from WailMail_common import *
 
+class DeterminedOS(Enum):
+    UNKNOWN = 1
+    RASPBIAN = 2
+    WINDOWS = 3
+    UBUNTU = 4
+    UNSUPPORTED = 5
+
+os_determined = DeterminedOS.UNKNOWN
+
+def determine_os():
+    global os_determined
+    prev_dir = os.getcwd()
+    if(os.name == 'nt'):
+        os_determined = DeterminedOS.WINDOWS
+        return
+    elif(os.name == 'posix'):
+        try:
+            os.chdir('/')
+            os.chdir('proc')
+            with open('cpuinfo') as f:
+                if("Raspberry Pi" in f):
+                    os_determined = DeterminedOS.RASPBIAN
+                else:
+                    os_determined = DeterminedOS.UBUNTU
+            os.chdir(prev_dir)
+        except:
+            os_determined = DeterminedOS.UNSUPPORTED
+    else:
+        os_determined = DeterminedOS.UNSUPPORTED
+
+         # to do, determine if raspberry pi or ubuntu
+    os_determined = DeterminedOS.UNSUPPORTED
+
+def play_based_on_os(audio_filename):
+    if(os_determined == DeterminedOS.UNKNOWN):
+        determine_os()
+
+    if(os_determined == DeterminedOS.WINDOWS):
+        audio_playback = os.system("start " + audio_filename)
+        audio = MP3(audio_filename)
+        time.sleep(math.ceil(audio.info.length))
+
+    elif(os_determined == DeterminedOS.RASPBIAN): # Linux
+        audio_playback = os.system("omxplayer -o both " + audio_filename)
+
+    elif(os_determined == DeterminedOS.UBUNTU):
+        audio_playback = os.system("mpg123 " + audio_filename)
+
+    else:
+        print("UNSUPPORTED")
+        audio_playback = -1
+    return audio_playback
+
 def audio_player(audio_queue, end_event, logging, check_freq=1):
-    os.chdir('static/audio')
+    os.chdir('static')
+    os.chdir('audio')
     while(not end_event.is_set()):
         while(not audio_queue.empty()):
             audio_filename = get_from_queue(audio_queue, end_event)
             logging.info("AC:: got " + audio_filename)
             if audio_filename is not None:
-                audio_playback = os.system("omxplayer -o local " + audio_filename)
+                audio_playback = play_based_on_os(audio_filename)
                 logging.info("AC::" + audio_filename + " return code:" + str(audio_playback))
             #time.sleep(check_freq)
         time.sleep(check_freq)
@@ -26,11 +82,22 @@ def dummy_audio_producer(audio_queue, end_event, logging):
         audio_filenames = ["john_cena.mp3", "megolovania_short.mp3", "screaming_sheep.mp3", "oh_no_no_no.mp3"]
         put_in_queue(audio_queue, audio_filenames[i % 4], end_event)
         logging.info("AP::" + audio_filenames[i % 4] + " produced")
-        time.sleep(20) # audio player can't exit (without sigint) until audio file is done being played
+        time.sleep(20)
         i += 1
 
 
 def audio_player_test(test_duration=30):
+
+    # test play_based_on_os
+    # prev_dir = os.getcwd()
+    # os.chdir('static')
+    # os.chdir('audio')
+    #
+    # play_based_on_os('john_cena.mp3')
+    # play_based_on_os('megolovania_short.mp3')
+    # os.chdir(prev_dir)
+
+    # test audio player thread
     end_event = threading.Event()
     audio_queue = queue.Queue()
     seconds = 0
@@ -53,11 +120,11 @@ def audio_player_test(test_duration=30):
             logging.info("ACF::" + str(audio_consumer_future))
             time.sleep(1)
             seconds += 1
-        
+
         end_event.set()
-        time.sleep(10)
+        time.sleep(15)  # audio player can't exit (without sigint) until audio file is done being played
         confirm_thread_finished(audio_producer_future)
         confirm_thread_finished(audio_consumer_future)
         print("audio thread test finished")
 
-#audio_player_test()
+audio_player_test()
