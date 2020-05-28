@@ -32,10 +32,11 @@ def determine_os():
             os.chdir('proc')
             print("temp changed dir")
             with open('cpuinfo') as f:
-                if("Raspberry" in f.read()):
-                    os_determined = DeterminedOS.RASPBIAN
-                else:
-                    os_determined = DeterminedOS.UBUNTU
+                for line in f:
+                    if("Raspberry Pi" in line):
+                        os_determined = DeterminedOS.RASPBIAN
+                        return
+                os_determined = DeterminedOS.UBUNTU
             os.chdir(prev_dir)
         except:
             os_determined = DeterminedOS.UNSUPPORTED
