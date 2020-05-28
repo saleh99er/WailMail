@@ -1,3 +1,9 @@
+import os
+import threading
+import queue
+
+from audio_player import *
+
 def dummy_audio_producer(audio_queue, end_event, logging):
     i = 0
     while(not end_event.is_set()):
