@@ -34,7 +34,7 @@ endEvent = threading.Event()
 emailQueue = queue.Queue()
 ctrlQueue = queue.Queue()
 ecr = emailClientReader.ECR(emailQueue, endEvent, logging, check_freq=5)
-print(endEvent.is_set())
+# print(endEvent.is_set())
 
 format = "%(asctime)s: %(message)s"
 logging.basicConfig(format=format, level=logging.INFO,
@@ -53,7 +53,7 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
 
         i = 0
         try:
-            while(i < 10):
+            while(i < 30):
                 time.sleep(1)
                 logging.info("ECR_test:: q size " + str(emailQueue.qsize()))
                 logging.info(producer_future)
@@ -64,8 +64,8 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
             endEvent.set()
             logging.info("ECR_test:: set end event")
             time.sleep(10)
-            logging.info(producer_future)
-            logging.info(consumer_future)
+            logging.info(producer_future.result())
+            logging.info(consumer_future.result())
 
         except Exception as e:
             logging.info("ECR_test:: exception occurred")

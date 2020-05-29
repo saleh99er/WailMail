@@ -51,9 +51,9 @@ class ECR:
 
     """ extract emails from IMAP server connection within messages and marks them as unread """
     def extractEmailsFromIMAP(messages, email_list, server):
-        email_ids = []
+        email_ids = [] # TO DO, make this an instance var of ECR for exception handling
         for uid, message_data in server.fetch(messages, 'RFC822').items():
-            email_message = email.message_from_bytes(message_data[b'RFC822'])
+            email_message = email.message_from_string(message_data[b'RFC822'].decode())
             email_ids.append(uid)
             email_list.append(ECR.email_to_KV(email_message))
         server.remove_flags(email_ids, [SEEN])
@@ -93,6 +93,7 @@ class ECR:
                 folder_status = server.folder_status(ECR.MAILBOX, 'UNSEEN')
                 newmails = int(folder_status[b'UNSEEN'])
                 if(old_email_count > newmails):#client has deleted some of their old mail, reset count
+                    self.logging.info("emails being read detected")
                     old_email_count = 0
                 elif(old_email_count == newmails):#no new emails to output
                     pass
@@ -132,9 +133,9 @@ class ECR:
             end_of_loop_str = "ECR:: end of email polling loop, connection=" + str(connected) + " endEvent=" + str(self.end_event.is_set())
             self.logging.info(end_of_loop_str)
         except KeyboardInterrupt:
-            self.logging("ECR::closing email client")
+            self.logging.info("ECR::closing email client")
             self.end_event.set()
             server.logout()
             return
         except Exception as e:
-            self.logging(e)
+            raise e
