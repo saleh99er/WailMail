@@ -10,7 +10,7 @@
 			{{rules_so_far}}
 			
 			<form action="{{ url_for('submit') }}" method="post">
-				<p>Assign a new rule: <textarea name="new_rule">1: gradescope -&gt screaming_sheep.mp3</textarea></p>
+				<p>Assign a new rule: <textarea name="new_rule">{{ rule_suggestion }}</textarea></p>
 				<input type="submit">
 			</form>
 			

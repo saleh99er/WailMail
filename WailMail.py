@@ -16,9 +16,14 @@ def flask_app(rule_queue, end_event):
     rules = {} 
     app = Flask(__name__)
 
+    def determineUnusedId():
+        for i in range(1000):
+            if(not i in rules):
+                return i
+
     @app.route('/')
     def index():
-        return render_template('index.html', rules_so_far = "")
+        return render_template('index.html', rules_so_far = "", rule_suggestion = "0: github or bug -> screaming_sheep.mp3")
 
     @app.route('/submit', methods=['POST'])
     def submit():
@@ -29,7 +34,8 @@ def flask_app(rule_queue, end_event):
             put_in_queue(rule_queue, rule, end_event)
 
             rules_so_far = [str(rule) for rule in list(rules.values())]
-            return render_template('index.html', rules_so_far = rules_so_far)
+            suggestion = str(determineUnusedId()) + ": woah or dude -> john_cena.mp3"
+            return render_template('index.html', rules_so_far = rules_so_far, rule_suggestion=suggestion)
 
 
     app.run(host='0.0.0.0')
