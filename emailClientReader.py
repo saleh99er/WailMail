@@ -39,6 +39,7 @@ class ECR:
         self.end_event = end_event
         self.logging = logging
         self.check_freq = check_freq
+        self.to_mark_unread = []
 
     """returns KV pair of datetime of email received date and email object"""
     def email_to_KV(email_obj):
@@ -50,13 +51,15 @@ class ECR:
         return kv[0]
 
     """ extract emails from IMAP server connection within messages and marks them as unread """
-    def extractEmailsFromIMAP(messages, email_list, server):
-        email_ids = [] # TO DO, make this an instance var of ECR for exception handling
+    def extractEmailsFromIMAP(self, messages, email_list, server):
         for uid, message_data in server.fetch(messages, 'RFC822').items():
+            if( not (b'RFC822' in message_data)):
+                continue
             email_message = email.message_from_string(message_data[b'RFC822'].decode())
-            email_ids.append(uid)
+            self.to_mark_unread.append(uid)
             email_list.append(ECR.email_to_KV(email_message))
-        server.remove_flags(email_ids, [SEEN])
+        server.remove_flags(self.to_mark_unread, [SEEN])
+        self.to_mark_unread = []
 
     """ blocking put() for queue unless end_event occurs """
     def put_email_in_queue(self,email_tuple):
@@ -105,7 +108,7 @@ class ECR:
                     email_list = []
 
                     # Extracting unread emails from IMAP Server 
-                    ECR.extractEmailsFromIMAP(messages, email_list, server)
+                    self.extractEmailsFromIMAP(messages, email_list, server)
 
                     # sort by date received,newest 1st
                     email_list.sort(reverse=True, key=ECR.extractDate)
@@ -135,6 +138,8 @@ class ECR:
         except KeyboardInterrupt:
             self.logging.info("ECR::closing email client")
             self.end_event.set()
+            server.remove_flags(self.to_mark_unread, [SEEN])
+            self.to_mark_unread = []
             server.logout()
             return
         except Exception as e:
