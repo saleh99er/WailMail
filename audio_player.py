@@ -26,11 +26,9 @@ def determine_os():
         os_determined = DeterminedOS.WINDOWS
         return
     elif(os.name == 'posix'):
-        print("so far determined linux-based")
         try:
             os.chdir('/')
             os.chdir('proc')
-            print("temp changed dir")
             with open('cpuinfo') as f:
                 for line in f:
                     if("Raspberry Pi" in line):
@@ -41,10 +39,8 @@ def determine_os():
         finally:
             os.chdir(prev_dir)
 
-        print("ubuntu check")
         index_uname = str(os.uname()).find("Ubuntu")
         if(index_uname > -1):
-            print("decided ubuntu")
             os_determined = DeterminedOS.UBUNTU
     else:
         os_determined = DeterminedOS.UNSUPPORTED
@@ -59,7 +55,7 @@ def play_based_on_os(audio_filename):
         audio = MP3(audio_filename)
         time.sleep(math.ceil(audio.info.length))
 
-    elif(os_determined == DeterminedOS.RASPBIAN): # Linux
+    elif(os_determined == DeterminedOS.RASPBIAN):
         audio_playback = os.system("omxplayer -o both " + audio_filename)
 
     elif(os_determined == DeterminedOS.UBUNTU):
@@ -80,5 +76,4 @@ def audio_player(audio_queue, end_event, logging, check_freq=1):
             if audio_filename is not None:
                 audio_playback = play_based_on_os(audio_filename)
                 logging.info("AC::" + audio_filename + " return code:" + str(audio_playback))
-            #time.sleep(check_freq)
-        time.sleep(check_freq)
+            time.sleep(check_freq)

@@ -85,7 +85,6 @@ class Condition:
                 self.terms[word] = False
 
     def set_true(self, word):
-        logging.info("uhoh stinky")
         if(word in self.terms):
             self.terms[word] = True
 
