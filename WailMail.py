@@ -65,7 +65,7 @@ if __name__ == '__main__':
     rule_queue = queue.Queue()
     audio_queue = queue.Queue()
 
-    ecr = ECR(email_queue, end_event, logging, 30)
+    ecr = ECR(email_queue, end_event, logging, 15)
     ep = EmailParser(email_queue, rule_queue, audio_queue, end_event, logging)
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=7) as executor:
