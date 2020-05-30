@@ -4,3 +4,9 @@ body {
 	color: #FFFFFF;
 }
 
+#tutorial {
+	background: #1D513E;
+	border: 5px outset black;
+	color: #DFDFDF;
+	padding: 5px;
+}

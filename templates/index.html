@@ -1,37 +1,44 @@
 <html>
 	<head>
-		<link rel="stylesheet" href='/static/style.css'/>
+		<link rel="stylesheet" href='static/style.css'/>
+		<script src="static/main.js"></script>
 	</head>
 	<body>
 
 		<h1>Wail Mail</h1>
 
+		
 		<div id="tutorial">
-			<p>Hi, Welcome to Wail Mail, the web app that plays an audio file if an email
-				 that matches a rule arrive. The rules reserve '(', ')', 'and', 'or', and
-				 '^'. Every other word separated by a space will be a term checked in your
-				  emails. Specifically from, subject, body, and multipart portions of your
-				   email. If that word occurence is seen (case insensitive but must be an
-				  exact word match), then that word will be substituted with True in your
-				 rule, False otherwise. What's located on the right of the `arrow` is 
-				 assumed to be your audio file located within static/audio of the machine
-				 running this program. Lastly, using python logical operators you can set
-				  pseudo-python logical expressions such as the following.  </p>
-			
-			<p> hello and world -> screaming_sheep.mp3</p>
+			<h2> Tutorial </h2>
+			<div>
+				<p>Hi, Welcome to Wail Mail, the web app that plays an audio file if an email
+					that matches a rule arrive. The rules reserve '(', ')', 'and', 'or', and
+					'^'. Every other word separated by a space will be a term checked in your
+					emails. Specifically from, subject, body, and multipart portions of your
+					email. If that word occurence is seen (case insensitive but must be an
+					exact word match), then that word will be substituted with True in your
+					rule, False otherwise. What's located on the right of the `arrow` is 
+					assumed to be your audio file located within static/audio of the machine
+					running this program. Lastly, using python logical operators you can set
+					pseudo-python logical expressions such as the following.  </p>
+				
+				<p> hello and world -> screaming_sheep.mp3</p>
 
-			<p>Now every time an email arrives with word occurences of 'hello' and 'world',
-				the screaming_sheep.mp3 will be played. Note previously arrived emails that
-				match this will not trigger this event even if left unread.
-			</p>
+				<p>Now every time an email arrives with word occurences of 'hello' and 'world',
+					the screaming_sheep.mp3 will be played. Note previously arrived emails that
+					match this will not trigger this event even if left unread.
+				</p>
+			</div>
 		</div>
 
 		<div id="ui">
 
+			<h2>Rules so far:</h2>
 			{{rules_so_far}}
 			
+			<h2>Make a new rule</h2>
 			<form action="{{ url_for('submit') }}" method="post">
-				<p>Assign a new rule: <textarea name="new_rule">{{ rule_suggestion }}</textarea></p>
+				<p><textarea name="new_rule">{{ rule_suggestion }}</textarea></p>
 				<input type="submit">
 			</form>
 			
