@@ -38,6 +38,10 @@ def flask_app(rule_queue, end_event):
             suggestion = str(determineUnusedId()) + ": woah or dude -> john_cena.mp3"
             return render_template('index.html', rules_so_far = rules_so_far, rule_suggestion=suggestion)
 
+    @app.route('/shutdown', methods=['GET'])
+    def shutdown():
+        end_event.set()
+        return "Thanks for using Wail Mail, bye bye"
 
     app.run(host='0.0.0.0')
 
@@ -64,19 +68,24 @@ if __name__ == '__main__':
     ecr = ECR(email_queue, end_event, logging, 30)
     ep = EmailParser(email_queue, rule_queue, audio_queue, end_event, logging)
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-        flask_future = executor.submit(flask_app, rule_queue, end_event)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=7) as executor:
+        flask_thread = threading.Thread(name="Flask thread", target=flask_app, args=(rule_queue, end_event), daemon=True)
+        flask_thread.start()
         ecr_future = executor.submit(ecr.startECR)
         ep_future = executor.submit(ep.parseQueues)
         ap_future = executor.submit(audio_player, audio_queue, end_event, logging)
     
-        futures = [flask_future, ecr_future, ep_future, ap_future]
+        futures = [ecr_future, ep_future, ap_future]
         seconds = 0
 
         logging.info("Main::all threads started")
 
-        while(True):
+        while(not end_event.is_set()):
             for number, future in enumerate(futures):
                 logging.info(str(number) + ":" + str(future))
-            time.sleep(1)
-            seconds += 1
+            time.sleep(5)
+            seconds += 5
+
+        time.sleep(1)
+        
+

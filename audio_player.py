@@ -81,10 +81,11 @@ def audio_player(audio_queue, end_event, logging, check_freq=1):
     os.chdir('static')
     os.chdir('audio')
     while(not end_event.is_set()):
-        while(not audio_queue.empty()):
+        if(not audio_queue.empty()):
             audio_filename = get_from_queue(audio_queue, end_event)
-            logging.info("AC:: got " + audio_filename)
+            #logging.info("AC:: got " + audio_filename)
             if audio_filename is not None and check_audio_there(audio_filename):
                 audio_playback = play_based_on_os(audio_filename)
                 logging.info("AC::" + audio_filename + " return code:" + str(audio_playback))
-            time.sleep(check_freq)
+        time.sleep(check_freq)
+    logging.info("AC::exiting")
