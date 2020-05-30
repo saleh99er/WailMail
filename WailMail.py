@@ -23,7 +23,8 @@ def flask_app(rule_queue, end_event):
 
     @app.route('/')
     def index():
-        return render_template('index.html', rules_so_far = "", rule_suggestion = "0: github or bug -> screaming_sheep.mp3")
+        rules_so_far = [str(rule) for rule in list(rules.values())]
+        return render_template('index.html', rules_so_far = rules_so_far, rule_suggestion = "0: github or bug -> screaming_sheep.mp3")
 
     @app.route('/submit', methods=['POST'])
     def submit():

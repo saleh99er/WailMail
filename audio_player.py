@@ -19,6 +19,17 @@ class DeterminedOS(Enum):
 
 os_determined = DeterminedOS.UNKNOWN
 
+""" returns true if audio file is there, false otherwise
+    used to guard against leveraging this app to execute
+    commands on the machine running WailMail"""
+def check_audio_there(filename):
+    try:
+        f = open(filename)
+        return True
+    except:
+        return False
+
+
 def determine_os():
     global os_determined
     prev_dir = os.getcwd()
@@ -73,7 +84,7 @@ def audio_player(audio_queue, end_event, logging, check_freq=1):
         while(not audio_queue.empty()):
             audio_filename = get_from_queue(audio_queue, end_event)
             logging.info("AC:: got " + audio_filename)
-            if audio_filename is not None:
+            if audio_filename is not None and check_audio_there(audio_filename):
                 audio_playback = play_based_on_os(audio_filename)
                 logging.info("AC::" + audio_filename + " return code:" + str(audio_playback))
             time.sleep(check_freq)
