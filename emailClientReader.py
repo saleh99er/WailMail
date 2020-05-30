@@ -116,15 +116,15 @@ class ECR:
                     # implicit filtering, only read delta emails
                     for i in range(delta):
                         email_obj = email_list[i][1]
-                        email_subj = email_obj.get('Subject')
-                        email_from = email_obj.get('From')
+                        email_subj = email_obj.get('Subject').lower()
+                        email_from = email_obj.get('From').lower()
                         email_body = None
                         email_multipart = []
                         if(email_obj.is_multipart()):
                             for payload in email_obj.get_payload():
-                                email_multipart.append(payload.get_payload())
+                                email_multipart.append(payload.get_payload().lower())
                         else:
-                            email_body = email_obj.get_payload()
+                            email_body = email_obj.get_payload().lower()
                         email_tuple = (email_subj, email_from, email_body, email_multipart)
                         
                         self.put_email_in_queue(email_tuple)

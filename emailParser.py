@@ -24,7 +24,7 @@ class Rule:
         arrowIndex = s.find("->")
         if(arrowIndex == -1):
             return None
-        condition = s[:arrowIndex]
+        condition = s[:arrowIndex].lower()
         audio = s[arrowIndex+2:]
 
         return Rule(int(id_no), Condition(condition.strip()), audio.strip())
