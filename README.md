@@ -98,7 +98,7 @@ If you have any issues, file an issue on the repository [here](https://github.co
 
 ## Acknowledgements
 
-Thanks Atsu for the inspiration on this project and thank you developers of [imapclient](https://imapclient.readthedocs.io/en/2.1.0/) for your library, streamlining the development needed to make this project possible.
+Thanks Atsu for the inspiration on this project and thank you developers of [imapclient](https://imapclient.readthedocs.io/en/2.1.0/) for your library, streamlining the development needed to make this project possible. Also thanks StackOverflow, StackExchange, and countless other resources for debugging / solutions to problems I ran into along the way.
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
