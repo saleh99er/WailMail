@@ -88,6 +88,10 @@ Overall view of how Wail Mail works?
 Why did you do Wail mail this way?
     * To be honest, this project was thrown together and I'd appreciate feedback/questions on how I put it together. I wanted to make something somewhat beginner friendly where anyone comfortable with Python and multithreading could understand how it works.
 
+What state is stored in WailMail?
+
+    * Any rules set by the user are only persistent for that session, power cycling or terminating the program can cause the previous session rules to be lost. Audio files in `static/audio` will not be affected. Refreshing the webpage does not cause the rule state to be reset. 
+
 ## Roadmap
 
 Other features not supported yet but under consideration are present on the Github issues page [here](https://github.com/saleh99er/WailMail/issues). By cloning the repository you can pull new changes and enjoy the new features without repeating the setup. 
