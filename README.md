@@ -50,8 +50,8 @@ Connect your host device to an audio output. Navigate to `audio` directory on yo
 * Windows 10 : ``` start megolovania_short.mp3```
 
 Record your host device's local/private IP address.
-    * For Ubuntu / Raspberry pi use `ifconfig` and look for your address in the `inet` field from the interface used to connect to your LAN (wlan, ethX, etc.).
-    * For Windows 10 use `ipconfig` and look for your address in the `IPv4 Address` field. 
+* For Ubuntu / Raspberry pi use `ifconfig` and look for your address in the `inet` field from the interface used to connect to your LAN (wlan, ethX, etc.).
+* For Windows 10 use `ipconfig` and look for your address in the `IPv4 Address` field. 
 
 Create an app password for WailMail and store the IMAP domain name, your email address, and app password in `user.txt` within the main directory. [Gmail App Password] (https://support.google.com/accounts/answer/185833?hl=en)
 
@@ -83,14 +83,13 @@ Here if we receive any emails with the word occurences of 'hello' and 'world', t
 ### Q & A
 
 Overall view of how Wail Mail works?
-    * There are 4 modules each can be seen as it's own thread where they are all isolated except for the interconnecting queues and an end event. Email Client Reader (ECR) periodically fetches new unread emails from the IMAP server and puts them in the email queue. The flask thread acts as a web server that allows the user to interact with Wail Mail via web browser. Any valid rules the user creates is put in the rule queue. The flask thread can also set the end event. The email parser takes from the email and rule queues and determines if any emails match any rules, if so, schedule an audio filename to be played by placing the filename in the audio queue. Lastly the audio player thread will take from the audio queue and plays the file if present in `static/audio`.
+* There are 4 modules each can be seen as it's own thread where they are all isolated except for the interconnecting queues and an end event. Email Client Reader (ECR) periodically fetches new unread emails from the IMAP server and puts them in the email queue. The flask thread acts as a web server that allows the user to interact with Wail Mail via web browser. Any valid rules the user creates is put in the rule queue. The flask thread can also set the end event. The email parser takes from the email and rule queues and determines if any emails match any rules, if so, schedule an audio filename to be played by placing the filename in the audio queue. Lastly the audio player thread will take from the audio queue and plays the file if present in `static/audio`.
 
 Why did you do Wail mail this way?
-    * To be honest, this project was thrown together and I'd appreciate feedback/questions on how I put it together. I wanted to make something somewhat beginner friendly where anyone comfortable with Python and multithreading could understand how it works.
+* To be honest, this project was thrown together and I'd appreciate feedback/questions on how I put it together. I wanted to make something somewhat beginner friendly where anyone comfortable with Python and multithreading could understand how it works.
 
 What state is stored in WailMail?
-
-    * Any rules set by the user are only persistent for that session, power cycling or terminating the program can cause the previous session rules to be lost. Audio files in `static/audio` will not be affected. Refreshing the webpage does not cause the rule state to be reset. 
+* Any rules set by the user are only persistent for that session, power cycling or terminating the program can cause the previous session rules to be lost. Audio files in `static/audio` will not be affected. Refreshing the webpage does not cause the rule state to be reset. 
 
 ## Roadmap
 
