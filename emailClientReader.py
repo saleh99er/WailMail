@@ -9,7 +9,6 @@
 """
 from imapclient import IMAPClient, SEEN
 import time
-import sys
 import email
 import datetime
 
