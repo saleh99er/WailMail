@@ -4,6 +4,7 @@ import concurrent
 import logging
 import threading
 import time
+import traceback
 
 def get_email_in_queue(email_queue, endEvent):
     while(not endEvent.is_set()):
@@ -52,8 +53,9 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
         logging.info("ECR_test::started consumer")
 
         i = 0
+        DURATION = 10 # in seconds
         try:
-            while(i < 30):
+            while(i < DURATION):
                 time.sleep(1)
                 logging.info("ECR_test:: q size " + str(emailQueue.qsize()))
                 logging.info(producer_future)
@@ -69,6 +71,6 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
 
         except Exception as e:
             logging.info("ECR_test:: exception occurred")
-            logging.info(e)
+            traceback.print_exc()
             
 
